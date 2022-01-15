@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -16,16 +17,20 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class Adapter_home extends RecyclerView.Adapter<Adapter_home.Movie_holder_home> {
 
     private Context context;
     private List<Movie_home> movieList;
+    List<Movie_home> filteredMovieList;
 
     public Adapter_home(Context context, List<Movie_home> movieList) {
         this.context = context;
         this.movieList = movieList;
+        this.filteredMovieList = movieList;
     }
 
     @NonNull
@@ -63,7 +68,7 @@ public class Adapter_home extends RecyclerView.Adapter<Adapter_home.Movie_holder
 
     @Override
     public int getItemCount() {
-        return movieList.size();
+        return filteredMovieList.size();
     }
 
     public class Movie_holder_home extends RecyclerView.ViewHolder{
@@ -81,6 +86,39 @@ public class Adapter_home extends RecyclerView.Adapter<Adapter_home.Movie_holder
             summery_home = itemView.findViewById(R.id.summery_home);
             movie_item = itemView.findViewById(R.id.movie_item);
         }
+    }
+
+    public Filter getFilter(){
+        return new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence charSequence) {
+
+                String key = charSequence.toString();
+                if (key.isEmpty()){
+                    filteredMovieList = movieList;
+                } else {
+                    List<Movie_home> listFiltered = new ArrayList<>();
+                    for (Movie_home row: movieList){
+                        String strKey = row.getTitle().replaceAll("\\s","");
+                        if (strKey.toLowerCase().contains(key.toLowerCase())){
+                            listFiltered.add(row);
+                        }
+                    }
+
+                    filteredMovieList = listFiltered;
+                }
+                FilterResults filterResults = new FilterResults();
+                filterResults.values = filteredMovieList;
+                return filterResults;
+            }
+
+            @Override
+            protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+
+                filteredMovieList = (List<Movie_home>)filterResults.values;
+                notifyDataSetChanged();
+            }
+        };
     }
 
 }
